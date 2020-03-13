@@ -1,0 +1,65 @@
+apiVersion: v1
+kind: Service
+metadata:
+  labels:
+    app: spring-chat
+  name: spring-chat
+  namespace: istio
+spec:
+  ports:
+  - name: http
+    port: 8000
+    protocol: TCP
+    targetPort: 8000
+  selector:
+    app: spring-chat
+---
+
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: spring-chat
+  labels:
+    app: spring-chat-deploy
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: spring-chat
+  template:
+    metadata:
+      labels:
+        app: spring-chat
+    spec:
+      containers:
+      - image: hit1414/spring-chat:latest
+        name: spring-chat-pod
+        env : 
+        - name : LOGIN_IP
+          value : "spring-login.istio.svc.cluster.local"
+        - name : LOGIN_PORT
+          value : "8000"
+        - name : PROJECT_IP
+          value : "spring-proj.istio.svc.cluster.local"
+        - name : PROJECT_PORT
+          value : "8000"
+        - name : MAIN_IP
+          value : "spring-main.istio.svc.cluster.local"
+        - name : MAIN_PORT
+          value : "8000"
+        - name : TODO_IP
+          value : "spring-todo.istio.svc.cluster.local"
+        - name : TODO_PORT
+          value : "8000"
+        - name : MESSAGE_IP
+          value : "spring-chat.istio.svc.cluster.local"
+        - name : MESSAGE_PORT
+          value : "8000"
+        - name : LOCAL_IP
+          value : "spring-main.istio.svc.cluster.local"
+        - name : LOCAL_PORT
+          value : "8000"
+        ports:
+        - containerPort: 8000
+      imagePullSecrets:
+      - name: regcred2

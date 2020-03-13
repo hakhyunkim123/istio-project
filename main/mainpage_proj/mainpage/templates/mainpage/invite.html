@@ -1,0 +1,20 @@
+<!doctype html>
+{% load static %}
+
+<div class="modal-body">
+  <form action="{% url 'invite' project_id=project_id %}" method="POST" encType="multiplart/form-data">
+	<table class="table table-bordered">
+		<tr>
+			<td>
+    {% for user in users  %}
+    {% if user.userName != request.session.id %}
+    <input type="checkbox" id="{{user.id}}" name="user_id" value="{{user.id}}">
+    <label for="vehicle1">{{user.name}}({{user.id}})</label><br>
+    {% endif %}
+    {% endfor %}
+    			</td>
+    		</tr>
+	</table>
+  </form>
+</div>
+

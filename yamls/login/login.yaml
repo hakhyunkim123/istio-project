@@ -1,0 +1,58 @@
+apiVersion: v1
+kind: Service
+metadata:
+  labels:
+    app: spring-login
+  name: spring-login
+  namespace: istio
+spec:
+  ports:
+  - name: http
+    port: 8000
+    protocol: TCP
+    targetPort: 8000
+  selector:
+    app: spring-login
+---
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: spring-login
+  labels:
+    app: spring-login-deploy
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: spring-login
+  template:
+    metadata:
+      labels:
+        app: spring-login
+    spec:
+      containers:
+      - image: hit1414/spring-msa-login:latest
+        name: spring-login-pod
+        env :
+        - name : LOGIN_IP
+          value : "spring-login.istio.svc.cluster.local"
+        - name : LOGIN_PORT
+          value : "8000"
+        - name : PROJECT_IP
+          value : "spring-proj.istio.svc.cluster.local"
+        - name : PROJECT_PORT
+          value : "8000"
+        - name : MAIN_IP
+          value : "spring-main.istio.svc.cluster.local"
+        - name : MAIN_PORT
+          value : "8000"
+        - name : TODO_IP
+          value : "spring-todo.istio.svc.cluster.local"
+        - name : TODO_PORT
+          value : "8000"
+        ports:
+        - containerPort: 8000
+      imagePullSecrets:
+      - name: regcred2
+
+

@@ -1,0 +1,13 @@
+Insert into USER(id, password, name) values ('sh20200080', 'dufl@01rla' , '김여리');
+Insert into USER(id, password, name) values ('sh20100094', 'gkrgus@02kim', '김학현' );
+Insert into USER(id, password, name) values ('sh20200081', '1111', '홍길동' );
+Insert into USER(id, password, name) values ('sh20200082', '1111', '신짱구' );
+Insert into USER(id, password, name) values ('sh20200083', '1111', '김철수' );
+Insert into USER(id, password, name) values ('sh20200084', '1111', '김훈이' );
+Insert into USER(id, password, name) values ('sh20200085', '1111', '김맹구' );
+Insert into USER(id, password, name) values ('sh20200086', '1111', '김유리' );
+Insert into USER(id, password, name) values ('sh20200087', '1111', '안철수' );
+Insert into USER(id, password, name) values ('sh20200088', '1111', '김수지' );
+Insert into USER(id, password, name) values ('sh20200089', '1111', '고길동' );
+Insert into USER(id, password, name) values ('sh20200090', '1111', '신형만' );
+Insert into USER(id, password, name) values ('admin', 'admin', 'admin' );

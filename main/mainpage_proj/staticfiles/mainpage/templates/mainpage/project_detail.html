@@ -1,0 +1,131 @@
+
+{% extends 'mainpage/base.html' %}
+
+{% block content %}
+<nav class="navbar navbar-expand-sm navbar-light bg-light">
+  <div class="container-fluid">
+    <button type="button" id="sidebarCollapse" class="btn btn-primary">
+      <i class="fa fa-bars"></i>
+    </button>
+    <div id="navbarSupportedContent">
+      <ul class="nav navbar-nav ml-auto">
+	      <li class="nav-item active"><a class="nav-link" href="{% url 'notice_list' project_id=project_id %}">공지사항</a></li>
+	      <!-- <li class="nav-item active"><a class="nav-link" href="{% url 'notice_new' project_id=project_id %}">쪽지함</a></li> -->
+	      <!-- <li class="nav-item active"><a class="nav-link" href="{% url 'gotoChat' %}">채팅방</a></li> -->
+<!-- ======================================================================================================================== -->
+	      <li class="nav-item active">
+		  <a href="#inviteModal" class="nav-link" data-remote="{% url 'invite' project_id=project_id %}"
+		  data-toggle="modal" data-target="#inviteModal">초대하기</a></li>
+<!-- ======================================================================================================================== -->
+	      <li class="nav-item active"><a class="nav-link" href="{% url 'front' %}">Home</a></li>
+      </ul>
+    </div>
+  </div>
+</nav>
+<table class="table table-bordered">
+   <tr>
+	<h2><style="color:black"/>■ Notice</h2>
+   </tr>
+</table>
+{% for post in posts %}
+<div class="container-fluid" style="padding-top: 10px; border-radius:1em; margin: 10px; border:2px solid black;">
+	<h5 class="mb-4"><a href = "{% url 'notice_detail' notice_id=post.noticeId project_id=project_id %}">{{ post.title }}</h5></a>
+	<ul>
+		<li> {{ post.author }} </li>
+		<li> {{ post.createdDate }} </li>
+	</ul>
+</div>
+{% endfor %}
+<!--
+<table class="table table-bordered">
+  <tr>
+	<h2>Message</h2>
+  </tr>
+</table>
+-->
+<table class="table table-bordered">
+  <tr>
+  	<h2>■ Chatroom</h2>
+  </tr>
+<table class="table table-bordered">
+
+<tr>
+<td>
+<textarea id="chat-log" cols="20" rows="5" class="form-control">{% for content in contents %}
+{{ content.user }}: {{ content.content }} {% endfor %}
+</textarea>
+</td>
+</tr>
+    <tr>
+    	<td colspan="2">
+    	  <input id="chat-message-input" type="text" size="50"/>
+    	  <input id="chat-message-submit" type="button" value="Send", size="5"/>
+	  <input type="hidden" id="userId" name="userId" value="{{ content.userId }}"></input>
+	</td>
+    </tr>
+</table>
+
+<!-- ======================================================================================================================== -->
+<div class="modal fade" id="inviteModal" tabindex="-1" role="dialog">
+  <div class="modal-dialog" role="document">
+    <div class="modal-content">
+      <div class="modal-header">
+        <h5 class="modal-title" id="exampleModalLabel">초대하기</h5>
+        <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+          <span aria-hidden="true">×</span>
+        </button>
+      </div>
+      <form action="{% url 'invite' project_id=project_id%}" method="POST" encType="multiplart/form-data">
+      <div class="modal-body">
+        ... remote content from "data-remote" loads here ...
+      </div>
+      <div class="modal-footer">
+        <button type="submit" class="btn btn-primary" id="inviteBtn">초대하기</button>
+        <button type="button" class="btn btn-secondary" data-dismiss="modal">Close</button>
+      </div>
+      </form>
+    </div>
+  </div>
+</div>
+<!-- ======================================================================================================================== -->
+
+<script>
+    var roomName = {{ room_name_json }};
+
+    var chatSocket = new WebSocket(
+        'ws://' + window.location.host +
+        '/ws/chat/' + roomName + '/');
+
+    chatSocket.onmessage = function(e) {
+        var data = JSON.parse(e.data);
+        var message = data['message'];
+	var userId = data['userId'];
+        document.querySelector('#chat-log').value += (userId + ' : ' + message + '\n');
+    };
+
+    chatSocket.onclose = function(e) {
+        console.error('Chat socket closed unexpectedly');
+    };
+
+    document.querySelector('#chat-message-input').focus();
+    document.querySelector('#chat-message-input').onkeyup = function(e) {
+        if (e.keyCode === 13) {  // enter, return
+            document.querySelector('#chat-message-submit').click();
+        }
+    };
+
+    document.querySelector('#chat-message-submit').onclick = function(e) {
+	var messageInputDom = document.querySelector('#chat-message-input');
+        var message = messageInputDom.value;
+        chatSocket.send(JSON.stringify({
+            'message': message,
+	    'userId' : userId,
+        }));
+
+        messageInputDom.value = '';
+    };
+
+</script>
+{% endblock %}
+
+

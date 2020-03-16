@@ -1,0 +1,75 @@
+{% extends 'mainpage/base.html' %}
+
+{% block content %}
+	<nav class="navbar navbar-expand-sm navbar-light bg-light">
+    <div class="container-fluid">
+      <button type="button" id="sidebarCollapse" class="btn btn-primary">
+      <i class="fa fa-bars"></i>
+      </button>
+      <div id="navbarSupportedContent">
+        <ul class="nav navbar-nav ml-auto">
+        <li class="nav-item active"><a class="nav-link" href="{% url 'notice_list' project_id=project_id %}">공지사항</a></li>
+<!-- ======================================================================================================================== -->
+	  {% if request.session.id == post.author %}
+	  <li class="nav-item active"><a class="nav-link" href="{% url 'notice_edit' notice_id=post.noticeId project_id=project_id %}">수정</a></li>
+	  <li class="nav-item active"><a class="nav-link" href="{% url 'notice_delete' notice_id=post.noticeId project_id=project_id %}">삭제</a></li>
+	  {% endif %}
+<!-- ======================================================================================================================== -->
+	    <!-- <li class="nav-item active"><a class="nav-link" href="{% url 'notice_new' project_id=project_id%}">쪽지함</a></li> -->
+	    <!-- <li class="nav-item active"><a class="nav-link" href="{% url 'gotoChat' %}">채팅방</a></li> -->
+<!-- ======================================================================================================================== -->
+      <li class="nav-item active">
+        <a href="#inviteModal" class="nav-link" data-remote="{% url 'invite' project_id=project_id %}"
+        data-toggle="modal" data-target="#inviteModal">초대하기</a></li>
+<!-- ======================================================================================================================== -->
+            <li class="nav-item active"><a class="nav-link" href="{% url 'front' %}">Home</a></li>
+        </ul>
+      </div>
+    </div>
+	</nav>
+
+  <div class="post"> 
+    <table class="table table-bordered">
+	<thead>
+		<h1>{{ post.title }}</h1>
+    		<p> {{ post.createdDate }} </p>
+
+	</thead>	    
+	<tbody>
+    		<tr>
+			<th width="100">글쓴이</th>
+			<td><p class="form-control">{{ post.author }}</p></td>
+		</tr>
+		<tr>
+			<th>내용</th>
+			<td><p class="form-control">{{ post.text|linebreaksbr }}</p></td>
+		</tr>
+    	</tbody>
+    </table>
+  </div>
+
+<!-- ======================================================================================================================== -->
+<div class="modal fade" id="inviteModal" tabindex="-1" role="dialog">
+  <div class="modal-dialog" role="document">
+    <div class="modal-content">
+      <div class="modal-header">
+        <h5 class="modal-title" id="exampleModalLabel">초대하기</h5>
+        <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+          <span aria-hidden="true">×</span>
+        </button>
+      </div>
+      <form action="{% url 'invite' project_id=project_id%}" method="POST" encType="multiplart/form-data">
+      <div class="modal-body">
+        ... remote content from "data-remote" loads here ...
+      </div>
+      <div class="modal-footer">
+        <button type="submit" class="btn btn-primary" id="inviteBtn">초대하기</button>
+        <button type="button" class="btn btn-secondary" data-dismiss="modal">Close</button>
+      </div>
+      </form>
+    </div>
+  </div>
+</div>
+<!-- ======================================================================================================================== -->
+
+{% endblock %}

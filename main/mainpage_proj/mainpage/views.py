@@ -15,7 +15,6 @@ LOGIN_URL = 'http://' + os.environ.get('LOGIN_IP') + ':' + os.environ.get('LOGIN
 MESSAGE_URL='http://'+os.environ.get('MESSAGE_IP')+":"+os.environ.get('MESSAGE_PORT')
 USERID=""
 
-# ============================================================================================================================ #
 def call_project(id) :
     param_dict = { "userId" : id }
 
@@ -25,17 +24,23 @@ def call_project(id) :
 
 def front(request) :
     URL = TODO_URL + '/todo/list'
-    response=requests.get(URL)
-    json_data=response.json()
-    arr=[]
-    for i in range(len(json_data)):
-        arr.append({'content': json_data[i]['content'],'pk': json_data[i]['pk']})
-
     project_data = call_project(request.session.get('id'))
+    res=requests.get(URL)
 
-    todo_content={'todos':arr, 'projects':project_data}
-    return render(request, 'mainpage/main.html', todo_content)
-# ============================================================================================================================ #
+    if res and res.status_code == 200 :
+        json_data=res.json()
+        arr=[]
+        for i in range(len(json_data)):
+            arr.append({'content': json_data[i]['content'],'pk': json_data[i]['pk']})
+
+        #project_data = call_project(request.session.get('id'))
+
+        todo_content={'todos':arr, 'projects':project_data, 'todo_list_status':res.status_code}
+        return render(request, 'mainpage/main.html', todo_content)
+    else:
+        error_msg = 'Todo List Error.'
+        todo_content={'todo_list_error':error_msg, 'projects':project_data, 'todo_list_status':res.status_code}
+        return render(request, 'mainpage/main.html', todo_content)
 
 def index(request):
     if not request.session.session_key:
@@ -46,21 +51,32 @@ def create_todo(request):
     user_input_str = request.POST['todoContent']
     URL = TODO_URL + '/todo/createTodo'
     todo_data={"content":user_input_str}
-    requests.post(URL, data=todo_data)
-    return redirect(front)
+    
+    res = requests.post(URL, data=todo_data)
+    
+    if res and res.status_code == 200 :
+        return redirect(front)
+    else :
+        error_msg = 'Create Todo Error.'
+        param_dict = { "todo_create_error" : error_msg }
+        return redirect(front, param=param_dict)
 
 def done_todo(request):
     done_todo_id=request.GET['todoNum']
     URL = TODO_URL + '/todo/doneTodo'
     URL+="/"+done_todo_id
-    requests.delete(URL)
-    return redirect(front)
+    res = requests.delete(URL)
+    
+    if res and res.status_code == 200 :
+        return redirect(front)
+    else :
+        error_msg = 'Done Todo Error.'
+        return render(request, 'mainpage/main.html', {'todo_done_error':error_msg})
 
-# ============================================================================================================================ #
 @csrf_exempt
 def add_project(request) :
     if request.method == 'POST' :
-        URL = PROJECT_URL + '/api/proj/projectInfo/' + request.session.get('id')
+        URL = PROJECT_URL + '/api/proj/projectInfo/' + str(request.session.get('id'))
         response=dict(request.POST)
 
         print(response)
@@ -70,8 +86,6 @@ def add_project(request) :
             arr=response['user_id']
             for i in range(len(arr)):
                 str2+=arr[i]+':'
-
-        print(str2)
 
         res = requests.post(URL, data=str2.encode('utf-8'))
     else :
@@ -101,7 +115,6 @@ def invite(request, project_id) :
         return render(request, 'mainpage/invite.html', {'users' : res.json(), 'project_id' : project_id})
 
     return HttpResponse(status=204)
-# ============================================================================================================================ #
 
 def notice_list(request, project_id) :
     proj_list = call_project(request.session.get('id'))
@@ -118,14 +131,20 @@ def get_project_detail(request, project_id) :
 def goto_proj(request, project_id) :
     proj_list = call_project(request.session.get('id'))
     posts = get_project_detail(request, project_id)
+    
     # chat 
     URL = MESSAGE_URL+'/getChat/'+str(project_id)
     response=requests.get(URL)
-    json_data=response.json()
-    arr=[]
-    if json_data != None :
-        for i in range(len(json_data)):
-            arr.append({'content': json_data[i]['content'], 'user': json_data[i]['user']})
+    if response and response.status_code == 200 :
+        json_data=response.json()
+        arr=[]
+        if json_data != None :
+            for i in range(len(json_data)):
+                arr.append({'content': json_data[i]['content'], 'user': json_data[i]['user']})
+    else :
+        status = res.status_code
+        arr = 'Chat Error!!!!!!!'
+            
     content={'contents':arr, 
             'posts': posts,
             'project_id': project_id, 

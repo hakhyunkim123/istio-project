@@ -22,6 +22,7 @@ LOGIN_URL = 'http://' + os.environ.get('LOGIN_IP') + ':' + os.environ.get('LOGIN
 MESSAGE_URL='http://'+os.environ.get('MESSAGE_IP')+":"+os.environ.get('MESSAGE_PORT')
 USERID=""
 
+# make headers for request with auth, user id
 def get_forward_headers(request):
     headers = {}
 
@@ -31,11 +32,9 @@ def get_forward_headers(request):
     if 'Authorization' in request.session:
         headers['Authorization'] = request.session.get('Authorization')
 
-    #request.META['Authorization'] = headers['Authorization']
-    #request.META['end-user'] = request.session.get('id')
-
     return headers
 
+# call project detail information.
 def call_project(request, id) :
     headers = get_forward_headers(request)
     param_dict = { "userId" : id }
@@ -45,27 +44,16 @@ def call_project(request, id) :
     return response.json()
 
 def front(request) :
-    print('11111111111111111111111111111111111111111')
-    print(request.META.get('testtt'))
-    for header in request.META.items():
-	    print(header)
-    #print(request.META.items())
     headers = get_forward_headers(request)
     URL = TODO_URL + '/todo/list'
     project_data = call_project(request, request.session.get('id'))
     res=requests.get(URL, headers = headers)
-
-    #print('==========================================================================================')
-    #print(request.META.items())
-    #print(request['REQUEST_METHOD'])
 
     if res and res.status_code == 200 :
         json_data=res.json()
         arr=[]
         for i in range(len(json_data)):
             arr.append({'content': json_data[i]['content'],'pk': json_data[i]['pk']})
-
-        #project_data = call_project(request.session.get('id'))
 
         todo_content={'todos':arr, 'projects':project_data, 'todo_list_status':res.status_code}
         return render(request, 'mainpage/main.html', todo_content)
@@ -78,9 +66,6 @@ def index(request):
 	if 'id' in request.session:
 		return redirect(front)
 	return redirect(login)
-    #if not request.session.session_key:
-    #    return redirect(login)
-    #return redirect(front)
 
 def create_todo(request):
     headers = get_forward_headers(request)
@@ -136,21 +121,21 @@ def add_project(request) :
 @csrf_exempt
 def invite(request, project_id) :
     headers = get_forward_headers(request)
+
+    # After click Invite button
     if request.method == 'POST' :
         URL = PROJECT_URL + '/api/proj/invite/' + str(project_id)
         response=dict(request.POST)
-        print(response)
-        print(response['user_id'])
         arr=response['user_id']
         str2=""
+
         for i in range(len(arr)):
             str2+=arr[i]+":"
-        print(str2)
         res = requests.post(URL, headers = headers, data=str2)
+    # open modal dialog to invite
     else :
         URL = PROJECT_URL + '/api/proj/invite/' + str(project_id)
         res = requests.get(URL, headers = headers)
-        #print(res.json())
         return render(request, 'mainpage/invite.html', {'users' : res.json(), 'project_id' : project_id})
 
     return HttpResponse(status=204)
@@ -194,6 +179,7 @@ def goto_proj(request, project_id) :
             'room_name_json':  mark_safe(json.dumps(str(project_id))),
             'userId':request.session.get('id')
             }
+
     return render(request, 'mainpage/project_detail.html', content)
 
 @csrf_exempt
@@ -205,7 +191,14 @@ def notice_new(request, project_id):
         URL = PROJECT_URL + '/proj/createNotice/' + str(project_id)
         res = requests.post(URL, headers = headers, data = request.POST)
         return redirect('notice_list', project_id=project_id)
-    return render(request, 'mainpage/notice_new.html', {'author' : request.session.get('id'), 'project_id' : project_id, 'projects' : proj_list})
+
+    contents = {
+        'author' : request.session.get('id'),
+        'project_id' : project_id,
+        'projects' : proj_list
+    }
+
+    return render(request, 'mainpage/notice_new.html', contents)
 
 @csrf_exempt
 def notice_edit(request, notice_id, project_id):
@@ -220,7 +213,15 @@ def notice_edit(request, notice_id, project_id):
         res = requests.put(URL, headers = headers, data = request.POST)
         if res.status_code == 200 :
             return redirect('notice_detail', notice_id=notice_id, project_id=project_id)
-    return render(request, 'mainpage/notice_edit.html', {'post': post, 'notice_id' : notice_id, 'project_id' : project_id, 'projects' : proj_list})
+    
+    contents = {
+        'post' : post,
+        'notice_id' : notice_id,
+        'project_id' : project_id,
+        'projects' : proj_list
+    }
+
+    return render(request, 'mainpage/notice_edit.html', contents)
 
 def notice_detail(request, notice_id, project_id):
     headers = get_forward_headers(request)
@@ -228,7 +229,15 @@ def notice_detail(request, notice_id, project_id):
 
     URL = PROJECT_URL + '/proj/noticeDetail/' + str(notice_id)
     post = requests.get(URL, headers = headers)
-    return render(request, 'mainpage/notice_detail.html', {'post': post.json(), 'notice_id' : notice_id, 'project_id' : project_id, 'projects' : proj_list})
+
+    contents = {
+        'post' : post.json(),
+        'notice_id' : notice_id,
+        'project_id' : project_id,
+        'projects' : proj_list
+    }
+
+    return render(request, 'mainpage/notice_detail.html', contents)
 
 def notice_delete(request, notice_id, project_id):
     headers = get_forward_headers(request)
@@ -242,11 +251,13 @@ def goto_chat(request) :
 @csrf_exempt
 def login(request) :
     if  request.method == "POST" :
-        headers = {}
-        headers['end-user'] = request.POST.get('id')
-        headers['Authorization'] = 'Bearer ' + get_jwt_token()
+        #headers = {}
+        #headers['end-user'] = request.POST.get('id')
+        #headers['Authorization'] = 'Bearer ' + get_jwt_token()
+
         URL = LOGIN_URL + '/logincheck'
-        res = requests.post(URL, headers=headers, data = request.POST)
+        res = requests.post(URL, data = request.POST)
+
         if res.status_code == 200 :
             request.session['id'] = request.POST.get('id')
             request.session['password'] = request.POST.get('password')
@@ -254,31 +265,13 @@ def login(request) :
             jwt_token = get_jwt_token()
             request.session['Authorization'] = str(jwt_token)
 
-            #Authorization =  urlencode({'Authoriztion': jwt_token})
-            #Authorization =  urlencode(jwt_token)
-
-            #url = '{}?{}'.format('https://52.231.52.58:30724/front/', jwt_token)
-            #response.headers = {'Authorization' : jwt_token}
-            
-            #response = redirect(reverse('front'))
-
             response = HttpResponseRedirect(reverse('front'))
-            #response = render(request, 'mainpage/main.html', {})
-            response['end-user'] = request.POST.get('id')
-            response['Authorization'] = str(jwt_token)
-            response['testtt'] = 'abcd'
 			
-            #response = requests.get('http://20.41.82.195:9000/front/')
-            #print(requests.history)
-
             global USERID
             USERID=request.session.get('id')
             #print(USERID)
-            #print(request.session.get('authorization'))
-            #print(request.META.items())
             print('login success!')
             return response
-            #return redirect(url)
         else :
             print('login error')
             return render(request, 'mainpage/login.html', {'error' : 'username or password is incorrect'})

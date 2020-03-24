@@ -13,5 +13,7 @@ class MyMiddleware:
             request.META['Authorization'] = request.session.get('Authorization')
         else: 
             request.META['Authorization'] = None
+
         response = self.get_response(request)
+
         return response

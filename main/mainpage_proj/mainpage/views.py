@@ -34,19 +34,27 @@ def get_forward_headers(request):
 
     return headers
 
-# call project detail information.
+# call project information by user id.
 def call_project(request, id) :
     headers = get_forward_headers(request)
     param_dict = { "userId" : id }
 
     URL = PROJECT_URL + '/api/proj/findProjectByUserId'
     response = requests.get(URL, headers = headers, params = param_dict)
-    return response.json()
+
+    status = response.status_code
+    project_data = response.json()
+
+    if status != 200:
+        project_data = str(response.json()) + ' - call project error.'
+   
+    return status, project_data
 
 def front(request) :
     headers = get_forward_headers(request)
     URL = TODO_URL + '/todo/list'
-    project_data = call_project(request, request.session.get('id'))
+    proj_list_status, projects = call_project(request, request.session.get('id'))
+
     res=requests.get(URL, headers = headers)
 
     if res and res.status_code == 200 :
@@ -54,13 +62,17 @@ def front(request) :
         arr=[]
         for i in range(len(json_data)):
             arr.append({'content': json_data[i]['content'],'pk': json_data[i]['pk']})
-
-        todo_content={'todos':arr, 'projects':project_data, 'todo_list_status':res.status_code}
-        return render(request, 'mainpage/main.html', todo_content)
     else:
-        error_msg = 'Todo List Error.'
-        todo_content={'todo_list_error':error_msg, 'projects':project_data, 'todo_list_status':res.status_code}
-        return render(request, 'mainpage/main.html', todo_content)
+        arr = str(res.json()) + ' - Todo List Error.'
+
+    todo_content={
+                 'todos':arr, 
+                 'projects':projects, 
+                 'todo_list_status':res.status_code,
+                 'proj_list_status':proj_list_status
+                 }
+
+    return render(request, 'mainpage/main.html', todo_content)
 
 def index(request):
 	if 'id' in request.session:
@@ -142,22 +154,45 @@ def invite(request, project_id) :
 
 def notice_list(request, project_id) :
     headers = get_forward_headers(request)
-    proj_list = call_project(request,request.session.get('id'))
+
+    proj_list_status, projects = call_project(request, request.session.get('id'))
 
     URL = PROJECT_URL + '/proj/noticeList/' + str(project_id) 
     res = requests.get(URL, headers = headers)
-    return render(request, 'mainpage/notice_list.html', {'posts' : res.json(), 'project_id' : project_id, 'projects' : proj_list})
+
+    notice_list_status = res.status_code
+    posts = res.json()
+    if notice_list_status != 200 :
+      posts = str(res.json()) + ' - notice list error. '
+
+    contents={
+            'posts': posts,
+            'project_id': project_id,
+            'notice_list_status' : notice_list_status,
+            'proj_list_status' : proj_list_status,
+            'projects' : projects
+            }
+
+
+    return render(request, 'mainpage/notice_list.html', contents)
 
 def get_project_detail(request, project_id) :
     headers = get_forward_headers(request)
     URL = PROJECT_URL + '/proj/noticeList/' + str(project_id) 
-    res = requests.get(URL, headers = headers)
-    return res.json()
+    response = requests.get(URL, headers = headers)
+
+    res_status = response.status_code
+    if response and res_status == 200 :
+        return res_status, response.json()
+    else :
+        err_message = str(response.json()) + ' - project detail error.'
+        return res_status, err_message
 
 def goto_proj(request, project_id) :
     headers = get_forward_headers(request)
-    proj_list = call_project(request, request.session.get('id'))
-    posts = get_project_detail(request, project_id)
+
+    proj_list_status, projects = call_project(request, request.session.get('id'))
+    proj_detail_status, posts = get_project_detail(request, project_id)
     
     # chat 
     URL = MESSAGE_URL+'/getChat/'+str(project_id)
@@ -169,15 +204,17 @@ def goto_proj(request, project_id) :
             for i in range(len(json_data)):
                 arr.append({'content': json_data[i]['content'], 'user': json_data[i]['user']})
     else :
-        status = res.status_code
+        status = response.status_code
         arr = 'Chat Error!!!!!!!'
             
     content={'contents':arr, 
+            'proj_detail_status' : proj_detail_status,
+            'proj_list_status' : proj_list_status,
             'posts': posts,
             'project_id': project_id, 
-            'projects': proj_list, 
             'room_name_json':  mark_safe(json.dumps(str(project_id))),
-            'userId':request.session.get('id')
+            'userId':request.session.get('id'),
+            'projects' : projects
             }
 
     return render(request, 'mainpage/project_detail.html', content)
@@ -185,7 +222,8 @@ def goto_proj(request, project_id) :
 @csrf_exempt
 def notice_new(request, project_id):
     headers = get_forward_headers(request)
-    proj_list = call_project(request, request.session.get('id'))
+
+    proj_list_status, projects = call_project(request, request.session.get('id'))
 
     if request.method == "POST":
         URL = PROJECT_URL + '/proj/createNotice/' + str(project_id)
@@ -195,7 +233,8 @@ def notice_new(request, project_id):
     contents = {
         'author' : request.session.get('id'),
         'project_id' : project_id,
-        'projects' : proj_list
+        'proj_list_status' : proj_list_status,
+        'projects' : projects
     }
 
     return render(request, 'mainpage/notice_new.html', contents)
@@ -203,7 +242,8 @@ def notice_new(request, project_id):
 @csrf_exempt
 def notice_edit(request, notice_id, project_id):
     headers = get_forward_headers(request)
-    proj_list = call_project(request, request.session.get('id'))
+
+    proj_list_status, projects = call_project(request, request.session.get('id'))
 
     GET_POST_URL = PROJECT_URL + '/proj/noticeDetail/' + str(notice_id)
     notice_detail = requests.get(GET_POST_URL, headers = headers)
@@ -218,14 +258,16 @@ def notice_edit(request, notice_id, project_id):
         'post' : post,
         'notice_id' : notice_id,
         'project_id' : project_id,
-        'projects' : proj_list
+        'proj_list_status' : proj_list_status,
+        'projects' : projects
     }
 
     return render(request, 'mainpage/notice_edit.html', contents)
 
 def notice_detail(request, notice_id, project_id):
     headers = get_forward_headers(request)
-    proj_list = call_project(request, request.session.get('id'))
+
+    proj_list_status, projects = call_project(request, request.session.get('id'))
 
     URL = PROJECT_URL + '/proj/noticeDetail/' + str(notice_id)
     post = requests.get(URL, headers = headers)
@@ -234,7 +276,8 @@ def notice_detail(request, notice_id, project_id):
         'post' : post.json(),
         'notice_id' : notice_id,
         'project_id' : project_id,
-        'projects' : proj_list
+        'projects' : projects,
+        'proj_list_status' : proj_list_status
     }
 
     return render(request, 'mainpage/notice_detail.html', contents)

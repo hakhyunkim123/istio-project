@@ -10,13 +10,9 @@
     <div id="navbarSupportedContent">
       <ul class="nav navbar-nav ml-auto">
 	      <li class="nav-item active"><a class="nav-link" href="{% url 'notice_list' project_id=project_id %}">공지사항</a></li>
-	      <!-- <li class="nav-item active"><a class="nav-link" href="{% url 'notice_new' project_id=project_id %}">쪽지함</a></li> -->
-	      <!-- <li class="nav-item active"><a class="nav-link" href="{% url 'gotoChat' %}">채팅방</a></li> -->
-<!-- ======================================================================================================================== -->
 	      <li class="nav-item active">
 		  <a href="#inviteModal" class="nav-link" data-remote="{% url 'invite' project_id=project_id %}"
 		  data-toggle="modal" data-target="#inviteModal">초대하기</a></li>
-<!-- ======================================================================================================================== -->
 	      <li class="nav-item active"><a class="nav-link" href="{% url 'front' %}">Home</a></li>
       </ul>
     </div>
@@ -27,6 +23,8 @@
 	<h2><style="color:black"/>■ Notice</h2>
    </tr>
 </table>
+
+{% if proj_detail_status == 200  %}
 {% for post in posts %}
 <div class="container-fluid" style="padding-top: 10px; border-radius:1em; margin: 10px; border:2px solid black;">
 	<h5 class="mb-4"><a href = "{% url 'notice_detail' notice_id=post.noticeId project_id=project_id %}">{{ post.title }}</h5></a>
@@ -36,13 +34,11 @@
 	</ul>
 </div>
 {% endfor %}
-<!--
-<table class="table table-bordered">
-  <tr>
-	<h2>Message</h2>
-  </tr>
-</table>
--->
+{% else %}
+<h3>{{ posts  }}</h3>
+{% endif %}
+
+
 <table class="table table-bordered">
   <tr>
   	<h2>■ Chatroom</h2>
@@ -65,7 +61,6 @@
     </tr>
 </table>
 
-<!-- ======================================================================================================================== -->
 <div class="modal fade" id="inviteModal" tabindex="-1" role="dialog">
   <div class="modal-dialog" role="document">
     <div class="modal-content">
@@ -87,7 +82,6 @@
     </div>
   </div>
 </div>
-<!-- ======================================================================================================================== -->
 
 <script>
     var roomName = {{ room_name_json }};

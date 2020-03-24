@@ -18,18 +18,19 @@
         <a href="{% url 'front' %}" class="img logo rounded-circle mb-5" style="background-image: url({% static 'images/logo.jpg' %});"></a>
         <ul class="list-unstyled components mb-5">
           <li> <a href="{% url 'front' %}">TodoList</a> </li>
-	  <!-- <li> <a href="#">내 쪽지함</a> </li> -->
-<!-- ======================================================================================================================== -->
 	      <li>
 		    <a href="#pageSubmenu" data-toggle="collapse" aria-expanded="false" class="dropdown-toggle">프로젝트</a>
             <ul class="collapse list-unstyled" id="pageSubmenu">
+              {% if proj_list_status == 200 %}
 		      {% for project in projects %}
               <li><a href="{% url 'gotoProj' project_id=project.projectId %}">{{project.projectName}}</a></li>
 		      {% endfor %}
+              {% else %}
+              <h3> {{ projects }} </h3>
+              {% endif %}
             </ul>
 	      </li>
 	      <li> <a href="#theModal" data-toggle="modal" data-target="#theModal" data-remote="{% url 'addProject' %}">프로젝트추가</a></li>
-<!-- ======================================================================================================================== -->
         </ul>
 	    </div>
     </nav>
@@ -41,7 +42,6 @@
     </div>
   </div>
 
- <!-- ======================================================================================================================== -->
 	<!-- Modal -->
     <div id="myModal" class="modal fade" role="dialog">
       <div class="modal-dialog">
@@ -97,7 +97,6 @@
     $('#inviteModal').modal('hide');
    });
   </script>
-<!-- ======================================================================================================================== -->
 
   </body>
 </html>

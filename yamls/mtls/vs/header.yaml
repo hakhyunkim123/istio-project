@@ -9,7 +9,12 @@ spec:
   gateways:
   - spring-ingress-gateway
   http:
-  - match:
+  - fault:
+      delay:
+        fixedDelay: 7s
+        percentage:
+          value: 0
+    match:
     - uri:
         prefix: /
 #    - uri:

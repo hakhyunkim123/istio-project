@@ -12,6 +12,7 @@ RUN pip install requests
 RUN pip install whitenoise
 RUN pip install channels
 RUN pip install channels-redis
+RUN pip install jwcrypto
 
 CMD ["python", "manage.py", "makemigrations", "mainpage"]
 CMD ["python", "manage.py", "migrate"]

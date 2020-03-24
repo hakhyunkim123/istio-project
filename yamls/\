@@ -1,0 +1,72 @@
+apiVersion: networking.istio.io/v1alpha3
+kind: DestinationRule
+metadata:
+  name: spring-main
+spec:
+  host: spring-main
+  subsets:
+  - name: v1
+    labels:
+      version: v1
+  trafficPolicy:
+    tls:
+      mode: SIMPLE
+---
+apiVersion: networking.istio.io/v1alpha3
+kind: DestinationRule
+metadata:
+  name: spring-todo
+spec:
+  host: spring-todo
+  subsets:
+  - name: v1
+    labels:
+      version: v1
+  - name: v2
+    labels:
+      version: v2
+  trafficPolicy:
+    tls:
+      mode: SIMPLE
+---
+apiVersion: networking.istio.io/v1alpha3
+kind: DestinationRule
+metadata:
+  name: spring-login
+spec:
+  host: spring-login
+  subsets:
+  - name: v1
+    labels:
+      version: v1
+  trafficPolicy:
+    tls:
+      mode: SIMPLE
+---
+apiVersion: networking.istio.io/v1alpha3
+kind: DestinationRule
+metadata:
+  name: spring-proj
+spec:
+  host: spring-proj
+  subsets:
+  - name: v1
+    labels:
+      version: v1
+  trafficPolicy:
+    tls:
+      mode: SIMPLE
+---
+apiVersion: networking.istio.io/v1alpha3
+kind: DestinationRule
+metadata:
+  name: spring-chat
+spec:
+  host: spring-chat
+  subsets:
+  - name: v1
+    labels:
+      version: v1
+  trafficPolicy:
+    tls:
+      mode: SIMPLE

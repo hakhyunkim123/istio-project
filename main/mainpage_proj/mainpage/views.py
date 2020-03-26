@@ -42,16 +42,16 @@ def call_project(request, id) :
     URL = PROJECT_URL + '/api/proj/findProjectByUserId'
     response = requests.get(URL, headers = headers, params = param_dict)
 
-    status = response.status_code
-    project_data = response.json()
-
-    if status != 200:
-        project_data = str(response.json()) + ' - call project error.'
+    if response.status_code != 200:
+        proj_data = str(response.json()) + ' - call project error.'
+    else:
+        proj_data = response.json()
    
-    return status, project_data
+    return response.status_code, proj_data
 
 def front(request) :
     headers = get_forward_headers(request)
+    print(request.META.items())
     URL = TODO_URL + '/todo/list'
     proj_list_status, projects = call_project(request, request.session.get('id'))
 
@@ -63,7 +63,7 @@ def front(request) :
         for i in range(len(json_data)):
             arr.append({'content': json_data[i]['content'],'pk': json_data[i]['pk']})
     else:
-        arr = str(res.json()) + ' - Todo List Error.'
+        arr = str(res.text) + ' - Todo List Error.'
 
     todo_content={
                  'todos':arr, 
@@ -114,8 +114,6 @@ def add_project(request) :
         URL = PROJECT_URL + '/api/proj/projectInfo/' + str(request.session.get('id'))
         response=dict(request.POST)
 
-        print(response)
-
         str2=str(response['projectName'][0]) + ':' + str(response['projectDescription'][0]) + ':'
         if response.get('user_id') != None :
             arr=response['user_id']
@@ -123,6 +121,7 @@ def add_project(request) :
                 str2+=arr[i]+':'
 
         res = requests.post(URL, headers = headers, data=str2.encode('utf-8'))
+
     else :
         URL = LOGIN_URL + '/api/getUserIdAnNameList'
         res = requests.get(URL, headers = headers)
@@ -163,7 +162,9 @@ def notice_list(request, project_id) :
     notice_list_status = res.status_code
     posts = res.json()
     if notice_list_status != 200 :
-      posts = str(res.json()) + ' - notice list error. '
+        posts = str(res.text) + ' - notice list error. '
+    else :
+        posts = res.json()
 
     contents={
             'posts': posts,
@@ -185,7 +186,7 @@ def get_project_detail(request, project_id) :
     if response and res_status == 200 :
         return res_status, response.json()
     else :
-        err_message = str(response.json()) + ' - project detail error.'
+        err_message = str(response.text) + ' - project detail error.'
         return res_status, err_message
 
 def goto_proj(request, project_id) :

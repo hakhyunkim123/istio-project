@@ -69,6 +69,55 @@ spec:
       - name: regcred2
       restartPolicy: Always
 ---
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: spring-main-err
+  labels:
+    app: spring-main
+    version: v2
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: spring-main
+      version: v2
+  template:
+    metadata:
+      labels:
+        app: spring-main
+        version: v2
+    spec:
+      containers:
+      - image: hhkim940/spring-main:err
+        name: spring-main-pod
+        env :
+        - name : LOGIN_IP
+          value : "spring-login.istio.svc.cluster.local"
+        - name : LOGIN_PORT
+          value : "8000"
+        - name : PROJECT_IP
+          value : "spring-proj.istio.svc.cluster.local"
+        - name : PROJECT_PORT
+          value : "8000"
+        - name : MAIN_IP
+          value : "spring-main.istio.svc.cluster.local"
+        - name : MAIN_PORT
+          value : "8000"
+        - name : TODO_IP
+          value : "spring-todo.istio.svc.cluster.local"
+        - name : TODO_PORT
+          value : "8000"
+        - name : MESSAGE_IP
+          value : "spring-chat.istio.svc.cluster.local"
+        - name : MESSAGE_PORT
+          value : "8000"
+        ports:
+        - containerPort: 8000
+      imagePullSecrets:
+      - name: regcred2
+      restartPolicy: Always
+---
 apiVersion: v1
 kind: Service
 metadata:

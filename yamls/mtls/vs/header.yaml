@@ -2,48 +2,6 @@
 apiVersion: networking.istio.io/v1alpha3
 kind: VirtualService
 metadata:
-  name: spring-ingress-vs
-spec:
-  hosts:
-  - "*"
-  gateways:
-  - spring-ingress-gateway
-  http:
-  - fault:
-      delay:
-        fixedDelay: 7s
-        percentage:
-          value: 0
-    match:
-    - uri:
-        prefix: /
-#    - uri:
-#        exact: /login/
-#- uri:
-#        exact: /front/
-#- headers:
-#        end-user:
-#          exact: sh20100094
-    route:
-    - destination:
-        host:  spring-main
-        subset: v2
-        port:
-          number: 8000
-        weight: 0
-    route:
-    - destination:
-        host: spring-main
-        subset: v1
-        weight: 100
-    timeout: 15s
-    #retries:
-    #  attempts: 3
-    #  perTryTimeout: 1s
----
-apiVersion: networking.istio.io/v1alpha3
-kind: VirtualService
-metadata:
   name: spring-todo
 spec:
   hosts:
@@ -62,12 +20,10 @@ spec:
     - destination:
         host: spring-todo
         subset: v1
-#weight: 100
   - route:
     - destination:
         host: spring-todo
         subset: v2
-#     weight: 0
 ---
 apiVersion: networking.istio.io/v1alpha3
 kind: VirtualService
@@ -86,6 +42,9 @@ spec:
     - destination:
         host: spring-proj
         subset: v1
+    retries:
+      attempts: 3
+      perTryTimeout: 2s
 ---
 apiVersion: networking.istio.io/v1alpha3
 kind: VirtualService

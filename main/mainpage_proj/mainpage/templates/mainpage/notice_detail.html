@@ -1,54 +1,50 @@
 {% extends 'mainpage/base.html' %}
 
 {% block content %}
-	<nav class="navbar navbar-expand-sm navbar-light bg-light">
+  <nav class="navbar navbar-expand-sm navbar-light bg-light">
     <div class="container-fluid">
       <button type="button" id="sidebarCollapse" class="btn btn-primary">
       <i class="fa fa-bars"></i>
       </button>
       <div id="navbarSupportedContent">
         <ul class="nav navbar-nav ml-auto">
-        <li class="nav-item active"><a class="nav-link" href="{% url 'notice_list' project_id=project_id %}">공지사항</a></li>
-<!-- ======================================================================================================================== -->
-	  {% if request.session.id == post.author %}
-	  <li class="nav-item active"><a class="nav-link" href="{% url 'notice_edit' notice_id=post.noticeId project_id=project_id %}">수정</a></li>
-	  <li class="nav-item active"><a class="nav-link" href="{% url 'notice_delete' notice_id=post.noticeId project_id=project_id %}">삭제</a></li>
-	  {% endif %}
-<!-- ======================================================================================================================== -->
-	    <!-- <li class="nav-item active"><a class="nav-link" href="{% url 'notice_new' project_id=project_id%}">쪽지함</a></li> -->
-	    <!-- <li class="nav-item active"><a class="nav-link" href="{% url 'gotoChat' %}">채팅방</a></li> -->
-<!-- ======================================================================================================================== -->
-      <li class="nav-item active">
-        <a href="#inviteModal" class="nav-link" data-remote="{% url 'invite' project_id=project_id %}"
-        data-toggle="modal" data-target="#inviteModal">초대하기</a></li>
-<!-- ======================================================================================================================== -->
-            <li class="nav-item active"><a class="nav-link" href="{% url 'front' %}">Home</a></li>
+          <li class="nav-item active"><a class="nav-link" href="{% url 'notice_list' project_id=project_id %}">공지사항</a></li>
+	      {% if request.session.id == post.author %}
+	        <li class="nav-item active"><a class="nav-link" href="{% url 'notice_edit' notice_id=post.noticeId project_id=project_id %}">수정</a></li>
+	        <li class="nav-item active"><a class="nav-link" href="{% url 'notice_delete' notice_id=post.noticeId project_id=project_id %}">삭제</a></li>
+	      {% endif %}
+          <li class="nav-item active">
+            <a href="#inviteModal" class="nav-link" data-remote="{% url 'invite' project_id=project_id %}"
+            data-toggle="modal" data-target="#inviteModal">초대하기</a></li>
+          <li class="nav-item active"><a class="nav-link" href="{% url 'front' %}">Home</a></li>
         </ul>
       </div>
     </div>
-	</nav>
+  </nav>
 
   <div class="post"> 
+    {% if post_status == 200 %}
     <table class="table table-bordered">
-	<thead>
-		<h1>{{ post.title }}</h1>
-    		<p> {{ post.createdDate }} </p>
-
-	</thead>	    
-	<tbody>
-    		<tr>
-			<th width="100">글쓴이</th>
-			<td><p class="form-control">{{ post.author }}</p></td>
-		</tr>
-		<tr>
-			<th>내용</th>
-			<td><p class="form-control">{{ post.text|linebreaksbr }}</p></td>
-		</tr>
-    	</tbody>
+	  <thead>
+        <h1>{{ post.title }}</h1>
+        <p> {{ post.createdDate }} </p>
+	  </thead>	    
+	  <tbody>
+        <tr>
+	      <th width="100">글쓴이</th>
+	      <td><p class="form-control">{{ post.author }}</p></td>
+	    </tr>
+        <tr>
+	      <th>내용</th>
+          <td><p class="form-control">{{ post.text|linebreaksbr }}</p></td>
+         </tr>
+      </tbody>
     </table>
+    {% else %}
+      <h3>{{ post }}</h3>
+    {% endif %}
   </div>
 
-<!-- ======================================================================================================================== -->
 <div class="modal fade" id="inviteModal" tabindex="-1" role="dialog">
   <div class="modal-dialog" role="document">
     <div class="modal-content">
@@ -70,6 +66,5 @@
     </div>
   </div>
 </div>
-<!-- ======================================================================================================================== -->
 
 {% endblock %}

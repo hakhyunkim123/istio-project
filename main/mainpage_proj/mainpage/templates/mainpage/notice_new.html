@@ -10,8 +10,6 @@
       <div id="navbarSupportedContent">
         <ul class="nav navbar-nav ml-auto">
             <li class="nav-item active"><a class="nav-link" href="{% url 'notice_list' project_id=project_id %}">공지사항</a></li>
-            <!-- <li class="nav-item active"><a class="nav-link" href="{% url 'notice_new' project_id=project_id %}">쪽지함</a></li>
-	    <li class="nav-item active"><a class="nav-link" href="{% url 'gotoChat' %}">채팅방</a></li> -->
             <li class="nav-item active"><a class="nav-link" href="{% url 'notice_list' project_id=project_id %}">Home</a></li>
         </ul>
       </div>
@@ -20,30 +18,32 @@
 <table class="table table-bordered">
     <thead>
 	<span style="font-size:xx-large";> ■ 글쓰기 </head>
+    {% if notice_detail_status is None or notice_detail_status == 200 %}
     </thead>
     <tbody>
-	<form action="{% url 'notice_new' project_id=project_id %}" method="POST" encType="multiplart/form-data">
-            <tr>
-                <th>제목: </th>
-		<td><input type="text" placeholder="제목을 입력하세요." value="{{ post.title }}" name="title" class="form-control"/></td>
-            </tr>
+	  <form action="{% url 'notice_new' project_id=project_id %}" method="POST" encType="multiplart/form-data">
+        <tr>
+          <th>제목: </th>
+          <td><input type="text" placeholder="제목을 입력하세요." value="{{ post.title }}" name="title" class="form-control"/></td>
+        </tr>
 	    <tr>
-                <th>작성자: </th>
-                <td><input type="text" placeholder="작성자를 입력하세요."  value="{{ post.author }}" name="author" class="form-control"/></td>
-            </tr>
-            <tr>
-            <tr>
-                <th>내용: </th>
-                <td><textarea cols="50" rows="10" placeholder="내용을 입력하세요." value="{{ post.text }}" name="text" class="form-control"></textarea></td>
-            </tr>
-            <tr>
-	        <td colspan="2" class="pull-center">
-                    <input class="pull-right" type="submit" value="취소" />
-                    <input class="pull-right" type="submit" value="등록" />
-
-                </td>
-            </tr>
-        </form>
+          <th>작성자: </th>
+          <td><input type="text" placeholder="작성자를 입력하세요."  value="{{ author }}" name="author" class="form-control"/></td>
+        </tr>
+        <tr>
+          <th>내용: </th>
+          <td><textarea cols="50" rows="10" placeholder="내용을 입력하세요." name="text" class="form-control">{{ post.text }}</textarea></td>
+        </tr>
+        <tr>
+	      <td colspan="2" class="pull-center">
+            <input class="pull-right" type="submit" value="취소" />
+            <input class="pull-right" type="submit" value="등록" />
+          </td>
+        </tr>
+      </form>
     </tbody>
+    {% else %}
+      {{ post }}
+    {% endif %}
 </table>
 {% endblock %}

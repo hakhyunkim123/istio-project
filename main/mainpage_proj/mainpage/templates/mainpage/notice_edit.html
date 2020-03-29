@@ -8,49 +8,43 @@
       </button>
       <div id="navbarSupportedContent">
         <ul class="nav navbar-nav ml-auto">
-            <li class="nav-item active"><a class="nav-link" href="{% url 'notice_list' project_id=project_id %}">공지사항</a></li>
-	    <!-- <li class="nav-item active"><a class="nav-link" href="{% url 'notice_new' project_id=project_id %}">쪽지함</a></li> -->
-	    <!-- <li class="nav-item active"><a class="nav-link" href="{% url 'gotoChat' %}">채팅방</a></li> -->
-<!-- ======================================================================================================================== -->
-           <li class="nav-item active">
-             <a href="#inviteModal" class="nav-link" data-remote="{% url 'invite' project_id=project_id %}"
-             data-toggle="modal" data-target="#inviteModal">초대하기</a></li>
-<!-- ======================================================================================================================== -->
-            <li class="nav-item active"><a class="nav-link" href="{% url 'front' %}">Home</a></li>
+          <li class="nav-item active"><a class="nav-link" href="{% url 'notice_list' project_id=project_id %}">공지사항</a></li>
+          <li class="nav-item active">
+            <a href="#inviteModal" class="nav-link" data-remote="{% url 'invite' project_id=project_id %}"
+            data-toggle="modal" data-target="#inviteModal">초대하기</a></li>
+          <li class="nav-item active"><a class="nav-link" href="{% url 'front' %}">Home</a></li>
         </ul>
       </div>
     </div>
 </nav>
 <table  class="table table-bordered"`>
-    <thead>
-	<span style="font-size:xx-large";> 글쓰기 </head>
-    </thead>   
-    <tbody>
-	<form action="{% url 'notice_edit' notice_id=post.noticeId project_id=project_id %}" method="POST" encType="multiplart/form-data">
-            <tr>
-                <th>제목: </th>
+  <thead>
+    <span style="font-size:xx-large";> 글쓰기 </head>
+  </thead>   
+  <tbody>
+    <form action="{% url 'notice_edit' notice_id=post.noticeId project_id=project_id %}" method="POST" encType="multiplart/form-data">
+      <tr>
+        <th>제목: </th>
 		<td><input type="text" placeholder="제목을 입력하세요." value="{{ post.title }}" name="title" class="form-control"/></td>
-            </tr>
-	    <tr>
-                <th>작성자: </th>
-                <td><input type="text" placeholder="작성자를 입력하세요."  value="{{ post.author }}" name="author" class="form-control"/></td>
-            </tr>
-            <tr>
-            <tr>
-                <th>내용: </th>
+      </tr>
+	  <tr>
+        <th>작성자: </th>
+        <td><input type="text" placeholder="작성자를 입력하세요."  value="{{ post.author }}" name="author" class="form-control"/></td>
+      </tr>
+      <tr>
+        <th>내용: </th>
 		<td><textarea cols="50" rows="10" placeholder="내용을 입력하세요." name="text" class="form-control">{{ post.text }}</textarea></td>
-            </tr>
-            <tr>
-                <td colspan="2">
-		    <button class="pull-right" type="button" onclick="{% url 'notice_detail' notice_id=post.noticeId project_id=project_id %}">취소</button>
-                    <input class="pull-right" type="submit" value="수정"/>
-                </td>
-            </tr>
-        </form>
-    </tbody>
+      </tr>
+      <tr>
+        <td colspan="2">
+		  <button class="pull-right" type="button" onclick="{% url 'notice_detail' notice_id=post.noticeId project_id=project_id %}">취소</button>
+          <input class="pull-right" type="submit" value="수정"/>
+        </td>
+      </tr>
+    </form>
+  </tbody>
 </table>
 
-<!-- ======================================================================================================================== -->
 <div class="modal fade" id="inviteModal" tabindex="-1" role="dialog">
   <div class="modal-dialog" role="document">
     <div class="modal-content">
@@ -72,6 +66,5 @@
     </div>
   </div>
 </div>
-<!-- ======================================================================================================================== -->
 
 {% endblock %}

@@ -43,7 +43,7 @@ def call_project(request, id) :
     response = requests.get(URL, headers = headers, params = param_dict)
 
     if response.status_code != 200:
-        proj_data = str(response.json()) + ' - call project error.'
+        proj_data = str(response.text) + ' - call project error.'
     else:
         proj_data = response.json()
    
@@ -91,7 +91,7 @@ def create_todo(request):
         return redirect(front)
     else :
         error_msg = 'Create Todo Error.'
-        param_dict = { "todo_create_error" : error_msg }
+        param_dict = { str(res.text) + "todo_create_error" : error_msg }
         return redirect(front, param=param_dict)
 
 def done_todo(request):
@@ -104,7 +104,7 @@ def done_todo(request):
     if res and res.status_code == 200 :
         return redirect(front)
     else :
-        error_msg = 'Done Todo Error.'
+        error_msg = str(res.text) + 'Done Todo Error.'
         return render(request, 'mainpage/main.html', {'todo_done_error':error_msg})
 
 @csrf_exempt
@@ -125,7 +125,19 @@ def add_project(request) :
     else :
         URL = LOGIN_URL + '/api/getUserIdAnNameList'
         res = requests.get(URL, headers = headers)
-        return render(request, 'mainpage/mymodal.html', {'users' : res.json()})
+
+        status = res.status_code
+        if status == 200 :
+            users = res.json()
+        else : 
+            users = str(res.text) + '- getUserIdAnNameList error'
+ 
+        content={
+                'users':users,
+                'get_user_info_status':status
+        }
+ 
+        return render(request, 'mainpage/mymodal.html', content)
 
     return redirect(front)
 
@@ -143,11 +155,25 @@ def invite(request, project_id) :
         for i in range(len(arr)):
             str2+=arr[i]+":"
         res = requests.post(URL, headers = headers, data=str2)
+
     # open modal dialog to invite
     else :
         URL = PROJECT_URL + '/api/proj/invite/' + str(project_id)
         res = requests.get(URL, headers = headers)
-        return render(request, 'mainpage/invite.html', {'users' : res.json(), 'project_id' : project_id})
+
+        status = res.status_code
+        if status == 200 :
+            users = res.json()
+        else :
+            users = str(res.text) + '- getInviteUserList error'
+
+        content={
+                'users':users,
+                'get_invite_user_status':status,
+                'project_id':project_id
+        }
+
+        return render(request, 'mainpage/invite.html', content)
 
     return HttpResponse(status=204)
 
@@ -198,19 +224,20 @@ def goto_proj(request, project_id) :
     # chat 
     URL = MESSAGE_URL+'/getChat/'+str(project_id)
     response=requests.get(URL, headers = headers)
-    if response and response.status_code == 200 :
+    chat_status = response.status_code
+    if response and chat_status == 200 :
         json_data=response.json()
         arr=[]
         if json_data != None :
             for i in range(len(json_data)):
                 arr.append({'content': json_data[i]['content'], 'user': json_data[i]['user']})
     else :
-        status = response.status_code
-        arr = 'Chat Error!!!!!!!'
+        arr = str(response.text) + 'getChat Error'
             
     content={'contents':arr, 
             'proj_detail_status' : proj_detail_status,
             'proj_list_status' : proj_list_status,
+            'chat_status' : chat_status,
             'posts': posts,
             'project_id': project_id, 
             'room_name_json':  mark_safe(json.dumps(str(project_id))),
@@ -247,8 +274,16 @@ def notice_edit(request, notice_id, project_id):
     proj_list_status, projects = call_project(request, request.session.get('id'))
 
     GET_POST_URL = PROJECT_URL + '/proj/noticeDetail/' + str(notice_id)
-    notice_detail = requests.get(GET_POST_URL, headers = headers)
-    post = notice_detail.json()
+
+    notice_detail_response = requests.get(GET_POST_URL, headers = headers)
+
+    notice_detail_status = notice_detail_response.status_code
+
+    if notice_detail_status == 200 :
+      post = notice_detail_response.json()
+    else :
+      post = str(notice_detail_response.text) + ' - noticeDetail error'
+
     if request.method == "POST":
         URL = PROJECT_URL + '/proj/updateNotice/' + str(notice_id)
         res = requests.put(URL, headers = headers, data = request.POST)
@@ -256,14 +291,16 @@ def notice_edit(request, notice_id, project_id):
             return redirect('notice_detail', notice_id=notice_id, project_id=project_id)
     
     contents = {
+        'author' : request.session.get('id'),
         'post' : post,
         'notice_id' : notice_id,
         'project_id' : project_id,
         'proj_list_status' : proj_list_status,
+        'notice_detail_status' : notice_detail_status,
         'projects' : projects
     }
 
-    return render(request, 'mainpage/notice_edit.html', contents)
+    return render(request, 'mainpage/notice_new.html', contents)
 
 def notice_detail(request, notice_id, project_id):
     headers = get_forward_headers(request)
@@ -271,14 +308,22 @@ def notice_detail(request, notice_id, project_id):
     proj_list_status, projects = call_project(request, request.session.get('id'))
 
     URL = PROJECT_URL + '/proj/noticeDetail/' + str(notice_id)
-    post = requests.get(URL, headers = headers)
+    post_response = requests.get(URL, headers = headers)
+
+    post_status = post_response.status_code
+
+    if post_status == 200 :
+      post = post_response.json()
+    else :
+      post = str(post_response.text) + ' - noticeDetail error'
 
     contents = {
-        'post' : post.json(),
+        'post' : post,
         'notice_id' : notice_id,
         'project_id' : project_id,
         'projects' : projects,
-        'proj_list_status' : proj_list_status
+        'proj_list_status' : proj_list_status,
+        'post_status' : post_status
     }
 
     return render(request, 'mainpage/notice_detail.html', contents)

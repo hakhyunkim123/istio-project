@@ -25,17 +25,17 @@
 
 <h2><a style="color:black" href = "{% url 'notice_list' project_id=project_id %}">■ Notice</h2>
 {% if notice_list_status == 200 %}
-{% for post in posts %}
-<div class="container-fluid" style="padding-top: 10px; border-radius:1em; margin: 10px; border:2px solid black;">
-  <h5 class="mb-4"> <a href = "{% url 'notice_detail' notice_id=post.noticeId project_id=project_id %}">{{ post.title }}</a></h5>
-  <ul>
-    <li> {{ post.author }} </li>
-    <li> {{ post.createdDate }} </li>
-  </ul>
-</div>
-{% endfor %}
+  {% for post in posts %}
+    <div class="container-fluid" style="padding-top: 10px; border-radius:1em; margin: 10px; border:2px solid black;">
+      <h5 class="mb-4"> <a href = "{% url 'notice_detail' notice_id=post.noticeId project_id=project_id %}">{{ post.title }}</a></h5>
+      <ul>
+        <li> {{ post.author }} </li>
+        <li> {{ post.createdDate }} </li>
+      </ul>
+    </div>
+  {% endfor %}
 {% else %}
-<h3> {{ posts }} </h3>
+  <h3>{{ posts }}</h3>
 {% endif %}
 
 <div class="modal fade" id="inviteModal" tabindex="-1" role="dialog">

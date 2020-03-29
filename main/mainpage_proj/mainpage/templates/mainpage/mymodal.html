@@ -4,31 +4,32 @@
 <div class="modal-body">
   <form action="{% url 'addProject' %}" method="POST" encType="multiplart/form-data">
   <table class="table table-bordered">
-	  <thead>
-		  <span "font-size:xx-large">■ Add Project</span>
-	  </thead>
-	  <tbody>
-	  	<tr>
-			<td> Project Name : <input type="text" placeholder="제목을 입력하세요." name="projectName" class="form-control"/></td>
-		</tr>
-	    	<tr>
-			<td>
-				<textarea cols="50" rows="3" placeholder="프로젝트 설명" name="projectDescription" class="form-control"></textarea>	
-			</td>
-		</tr>
-	<tr>
-		<td>
-    {% for user in users  %}
-    {% if user.id != request.session.id %}
-    <input type="checkbox" id="{{user.id}}" name="user_id" value="{{user.id}}">
-    <label for="vehicle1">{{user.name}}({{user.id}})</label><br>
-    {% endif %}
-    {% endfor %}
+    <thead>
+      <span "font-size:xx-large">■ Add Project</span>
+    </thead>
+    <tbody>
+      <tr>
+        <td> Project Name : <input type="text" placeholder="제목을 입력하세요." name="projectName" class="form-control"/></td>
+      </tr>
+      <tr>
+        <td><textarea cols="50" rows="3" placeholder="프로젝트 설명" name="projectDescription" class="form-control"></textarea></td>
+      </tr>
+	  <tr>
+        <td>
+        {% if get_user_info_status == 200 %}
+          {% for user in users  %}
+            {% if user.id != request.session.id %}
+              <input type="checkbox" id="{{user.id}}" name="user_id" value="{{user.id}}">
+              <label for="vehicle1">{{user.name}}({{user.id}})</label><br>
+            {% endif %}
+          {% endfor %}
+        {% else %}
+          <p>{{ users }}</p>
+        {% endif %}
 		</td>
-	</tr>
-	  </tbody>
+      </tr>
+    </tbody>
    </table>
-
   </form>
 </div>
 

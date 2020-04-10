@@ -1,7 +1,7 @@
 apiVersion: security.istio.io/v1beta1
 kind: PeerAuthentication
 metadata:
-  name: "default"
+  name: "spring-peer-auth"
   namespace: istio
 spec:
   mtls:

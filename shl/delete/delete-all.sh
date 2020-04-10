@@ -34,6 +34,10 @@ kubectl delete sa -n istio spring-proj-sa
 kubectl delete secret -n istio-system istio-ingressgateway-certs
 kubectl delete secret -n istio-system istio-ingressgateway-ca-certs
 
+kubectl delete peerauthentication -n istio default
+kubectl delete authorizationpolicy -n istio frontend-ingress
+kubectl delete requestauthentication -n istio jwt-example
+
 #kubectl delete RequestAuthentication req-auth -n istio
 #kubectl delete PeerAuthentication peer-auth -n istio 
 

@@ -1,0 +1,40 @@
+apiVersion: "security.istio.io/v1beta1"
+kind: "RequestAuthentication"
+metadata:
+  name: "spring-jwt"
+  namespace: istio
+spec:
+  selector:
+    matchLabels:
+      app: spring-todo
+#istio: ingressgateway
+  jwtRules:
+  - issuer: "testing@secure.istio.io"
+    jwksUri: "https://raw.githubusercontent.com/istio/istio/release-1.5/security/tools/jwt/samples/jwks.json"
+    fromHeaders:
+      - name: Authorization
+        prefix: ""
+# prefix: ""
+#triggerRules:
+#    - excludedPaths:
+#      - exact: /login/
+---
+apiVersion: "security.istio.io/v1beta1"
+kind: "AuthorizationPolicy"
+metadata:
+  name: "spring-jwt-authrization-policy"
+  namespace: istio
+#namespace: istio-system
+spec:
+  selector:
+    matchLabels:
+      app: spring-todo
+#istio: ingressgateway
+  action: DENY
+  rules:
+  - from:
+    - source:
+        notRequestPrincipals: ["testing@secure.istio.io/testing@secure.istio.io"]
+#to:
+#    - operation:
+#        paths: ["/front/createTodo/*"]
